@@ -34,9 +34,9 @@
 function isTimeValid() {
   const now = new Date();
   const start = new Date();
-  start.setHours(9, 0, 0);
+  start.setHours(5, 0, 0);
   const end = new Date();
-  end.setHours(9, 30, 0);
+  end.setHours(6, 30, 0);
   return now >= start && now <= end;
 }
 
@@ -44,7 +44,7 @@ form.addEventListener("submit", async function (e) {
   e.preventDefault();
 
   if (!isTimeValid()) {
-    alert("Attendance only allowed between 9:00 – 9:30 AM.");
+    alert("Attendance only allowed between 5:00 – 6:30 pM.");
     return;
   }
 
