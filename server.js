@@ -39,10 +39,13 @@ app.post('/submit-attendance', async (req, res) => {
   try {
     const { name, roll, date, latitude, longitude } = req.body;
 
-    // ✅ Time Check: only allow between 9:00 - 9:30 AM
+    // ✅ Time Check: only allow between 9:00 - 9:30 AM IST
     const now = new Date();
-    const hour = now.getHours();
-    const minute = now.getMinutes();
+    const indiaTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+    const hour = indiaTime.getHours();
+    const minute = indiaTime.getMinutes();
+
+    console.log("🕒 IST Time:", indiaTime.toString());
 
     if (hour === 9 && minute >= 0 && minute <= 30) {
       const newAttendance = new Attendance({
@@ -57,7 +60,7 @@ app.post('/submit-attendance', async (req, res) => {
       await newAttendance.save();
       res.status(200).json({ message: "✅ Attendance submitted and pending staff approval." });
     } else {
-      res.status(403).json({ message: "❌ Attendance only allowed between 9:00 - 9:30 AM." });
+      res.status(403).json({ message: "❌ Attendance only allowed between 9:00 - 9:30 AM (IST)." });
     }
   } catch (err) {
     console.error("❌ Error saving attendance:", err);
@@ -70,4 +73,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
-  
