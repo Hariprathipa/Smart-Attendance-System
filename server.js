@@ -44,11 +44,12 @@ app.post('/submit-attendance', async (req, res) => {
     const { name, roll, date, latitude, longitude } = req.body;
 
     // ✅ Time Check (IST)
-    const now = new Date();
-    const indiaTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-    const hour = indiaTime.getHours();
-    const minute = indiaTime.getMinutes();
+    const indiaTime = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+const time = new Date(indiaTime);
+const hour = time.getHours();
+const minute = time.getMinutes();
 
+console.log("🕒 Indian Time:", time.toString());
     if (hour === 9 && minute >= 0 && minute <= 30) {
       const newAttendance = new Attendance({
         name,
