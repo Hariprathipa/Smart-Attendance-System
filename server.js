@@ -8,9 +8,10 @@ const cors = require('cors');
 dotenv.config();
 
 const app = express();
-app.use(cors());
+app.use(cors()); // ✅ 1. Paste this after creating app
+
 app.use(bodyParser.json());
-app.use(express.urlencoded({ extended: true })); // for form data
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ✅ MongoDB Connection
@@ -27,10 +28,6 @@ const attendanceSchema = new mongoose.Schema({
   date: String,
   latitude: Number,
   longitude: Number,
-  submittedAt: {
-    type: Date,
-    default: () => new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }))
-  },
   status: {
     type: String,
     default: "Pending"
@@ -41,19 +38,17 @@ const Attendance = mongoose.model('Attendance', attendanceSchema);
 
 // ✅ API Route
 app.post('/submit-attendance', async (req, res) => {
+  console.log("📥 Request Received:", req.body); // ✅ 2. Paste here inside route
+
   try {
     const { name, roll, date, latitude, longitude } = req.body;
 
-    // ✅ Get IST time
+    // ✅ Time Check (IST)
     const now = new Date();
     const indiaTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
     const hour = indiaTime.getHours();
     const minute = indiaTime.getMinutes();
 
-    console.log("🧾 Received form:", req.body);
-    console.log("🕒 IST Time:", indiaTime.toString());
-
-    // ✅ Check time window (9:00–9:30 AM IST)
     if (hour === 9 && minute >= 0 && minute <= 30) {
       const newAttendance = new Attendance({
         name,
@@ -61,7 +56,6 @@ app.post('/submit-attendance', async (req, res) => {
         date,
         latitude,
         longitude,
-        submittedAt: indiaTime,
         status: "Pending"
       });
 
