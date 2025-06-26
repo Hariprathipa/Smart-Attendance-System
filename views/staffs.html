@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Staff Dashboard - Smart Attendance</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+</head>
+<body class="bg-light">
+
+  <div class="container py-4">
+    <h2 class="text-center text-primary mb-4">📋 Staff Attendance Dashboard</h2>
+
+    <table class="table table-bordered table-striped" id="attendanceTable">
+      <thead class="table-primary">
+        <tr>
+          <th>Name</th>
+          <th>Roll No</th>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Location</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <!-- Attendance entries will load here -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    async function fetchAttendance() {
+      const res = await fetch("/staff/attendance");
+      const data = await res.json();
+      const tbody = document.getElementById("tableBody");
+
+      tbody.innerHTML = "";
+
+      data.forEach(entry => {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+          <td>${entry.name}</td>
+          <td>${entry.roll}</td>
+          <td>${entry.date}</td>
+          <td>${entry.time}</td>
+          <td>${entry.location}</td>
+          <td><strong class="${entry.status === 'Approved' ? 'text-success' : entry.status === 'Rejected' ? 'text-danger' : 'text-warning'}">${entry.status}</strong></td>
+          <td>
+            <button class="btn btn-success btn-sm me-1" onclick="handleAction('${entry._id}', 'Approved')">Approve</button>
+            <button class="btn btn-danger btn-sm" onclick="handleAction('${entry._id}', 'Rejected')">Reject</button>
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function handleAction(id, status) {
+      await fetch(/staff/attendance/{id}, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status })
+      });
+
+      fetchAttendance();
+    }
+
+    // Initial load
+    fetchAttendance();
+  </script>
+
+</body>
+</html>
