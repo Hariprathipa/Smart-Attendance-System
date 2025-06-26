@@ -58,7 +58,7 @@
     }
 
     async function handleAction(id, status) {
-      await fetch(/staff/attendance/{id}, {
+      await fetch(`/staff/attendance/{id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status })
