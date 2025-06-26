@@ -51,7 +51,7 @@ app.post('/submit-attendance', async (req, res) => {
     console.log("🕒 Server IST Time:", indiaTime.toString());
 
     // ✅ Allow only between 5:00 PM to 6:30 PM
-    if ((hour === 9 && minute >= 0) || (hour === 9 && minute <= 30)) {
+    if ((hour === 19 && minute >= 0) || (hour === 20 && minute <= 30)){
       const newAttendance = new Attendance({
         name,
         roll,
