@@ -10,7 +10,7 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.urlencoded({ extended: true })); // ✅ For form data
+app.use(express.urlencoded({ extended: true })); // for form data
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ✅ MongoDB Connection
@@ -20,13 +20,17 @@ mongoose.connect(process.env.MONGODB_URI, {
 }).then(() => console.log("✅ MongoDB Connected"))
   .catch(err => console.error("❌ MongoDB Error:", err));
 
-// ✅ Schema
+// ✅ Attendance Schema
 const attendanceSchema = new mongoose.Schema({
   name: String,
   roll: String,
   date: String,
   latitude: Number,
   longitude: Number,
+  submittedAt: {
+    type: Date,
+    default: () => new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }))
+  },
   status: {
     type: String,
     default: "Pending"
@@ -35,21 +39,21 @@ const attendanceSchema = new mongoose.Schema({
 
 const Attendance = mongoose.model('Attendance', attendanceSchema);
 
-// ✅ Attendance Route
+// ✅ API Route
 app.post('/submit-attendance', async (req, res) => {
   try {
-    console.log("🧾 Received form:", req.body); // ✅ Log data
-
     const { name, roll, date, latitude, longitude } = req.body;
 
-    // ✅ Time validation: only 9:00–9:30 AM IST
+    // ✅ Get IST time
     const now = new Date();
     const indiaTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
     const hour = indiaTime.getHours();
     const minute = indiaTime.getMinutes();
 
-    console.log("🕒 IST Time:", indiaTime.toLocaleTimeString());
+    console.log("🧾 Received form:", req.body);
+    console.log("🕒 IST Time:", indiaTime.toString());
 
+    // ✅ Check time window (9:00–9:30 AM IST)
     if (hour === 9 && minute >= 0 && minute <= 30) {
       const newAttendance = new Attendance({
         name,
@@ -57,6 +61,7 @@ app.post('/submit-attendance', async (req, res) => {
         date,
         latitude,
         longitude,
+        submittedAt: indiaTime,
         status: "Pending"
       });
 
