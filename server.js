@@ -10,6 +10,7 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: true })); // ✅ For form data
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ✅ MongoDB Connection
@@ -19,7 +20,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 }).then(() => console.log("✅ MongoDB Connected"))
   .catch(err => console.error("❌ MongoDB Error:", err));
 
-// ✅ Attendance Schema
+// ✅ Schema
 const attendanceSchema = new mongoose.Schema({
   name: String,
   roll: String,
@@ -34,18 +35,20 @@ const attendanceSchema = new mongoose.Schema({
 
 const Attendance = mongoose.model('Attendance', attendanceSchema);
 
-// ✅ API Route
+// ✅ Attendance Route
 app.post('/submit-attendance', async (req, res) => {
   try {
+    console.log("🧾 Received form:", req.body); // ✅ Log data
+
     const { name, roll, date, latitude, longitude } = req.body;
 
-    // ✅ Time Check: only allow between 9:00 - 9:30 AM IST
+    // ✅ Time validation: only 9:00–9:30 AM IST
     const now = new Date();
     const indiaTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
     const hour = indiaTime.getHours();
     const minute = indiaTime.getMinutes();
 
-    console.log("🕒 IST Time:", indiaTime.toString());
+    console.log("🕒 IST Time:", indiaTime.toLocaleTimeString());
 
     if (hour === 9 && minute >= 0 && minute <= 30) {
       const newAttendance = new Attendance({
