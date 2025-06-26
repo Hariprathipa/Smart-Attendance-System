@@ -62,7 +62,7 @@
       }
 
       const formData = new FormData(form);
-      const response = await fetch("/attendance", {
+      const response = await fetch("/submit-attendance", {
         method: "POST",
         body: formData
       });
