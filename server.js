@@ -8,8 +8,7 @@ const cors = require('cors');
 dotenv.config();
 
 const app = express();
-app.use(cors()); // ✅ 1. Paste this after creating app
-
+app.use(cors());
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -36,35 +35,25 @@ const attendanceSchema = new mongoose.Schema({
 
 const Attendance = mongoose.model('Attendance', attendanceSchema);
 
-// ✅ API Route
+// ✅ API Route (No time check for now)
 app.post('/submit-attendance', async (req, res) => {
-  console.log("📥 Request Received:", req.body); // ✅ 2. Paste here inside route
+  console.log("📥 Request Received:", req.body);
 
   try {
     const { name, roll, date, latitude, longitude } = req.body;
 
-    // ✅ Time Check (IST)
-    const indiaTime = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
-const time = new Date(indiaTime);
-const hour = time.getHours();
-const minute = time.getMinutes();
+    // ✅ Allowing submission at any time (testing mode)
+    const newAttendance = new Attendance({
+      name,
+      roll,
+      date,
+      latitude,
+      longitude,
+      status: "Pending"
+    });
 
-console.log("🕒 Indian Time:", time.toString());
-    if (hour === 9 && minute >= 0 && minute <= 30) {
-      const newAttendance = new Attendance({
-        name,
-        roll,
-        date,
-        latitude,
-        longitude,
-        status: "Pending"
-      });
-
-      await newAttendance.save();
-      res.status(200).json({ message: "✅ Attendance submitted and pending staff approval." });
-    } else {
-      res.status(403).json({ message: "❌ Attendance only allowed between 9:00 - 9:30 AM (IST)." });
-    }
+    await newAttendance.save();
+    res.status(200).json({ message: "✅ Attendance submitted successfully (testing mode)." });
   } catch (err) {
     console.error("❌ Error saving attendance:", err);
     res.status(500).json({ message: "❌ Server error." });
