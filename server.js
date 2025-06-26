@@ -51,7 +51,7 @@ app.post('/submit-attendance', async (req, res) => {
     console.log("🕒 Server IST Time:", indiaTime.toString());
 
     // ✅ Allow only between 5:00 PM to 6:30 PM
-    if ((hour === 17 && minute >= 0) || (hour === 18 && minute <= 30)) {
+    if ((hour === 9 && minute >= 0) || (hour === 9 && minute <= 30)) {
       const newAttendance = new Attendance({
         name,
         roll,
@@ -64,7 +64,7 @@ app.post('/submit-attendance', async (req, res) => {
       await newAttendance.save();
       res.status(200).json({ message: "✅ Attendance submitted and pending staff approval." });
     } else {
-      res.status(403).json({ message: "❌ Attendance only allowed between 5:00 - 6:30 PM (IST)." });
+      res.status(403).json({ message: "❌ Attendance only allowed between 7:00 - 8:30 PM (IST)." });
     }
   } catch (err) {
     console.error("❌ Error saving attendance:", err);
