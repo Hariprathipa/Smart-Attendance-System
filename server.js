@@ -25,6 +25,8 @@ const attendanceSchema = new mongoose.Schema({
   name: String,
   roll: String,
   date: String,
+  time: String,         // ✅ Store time
+  location: String,     // ✅ Store location as string
   latitude: Number,
   longitude: Number,
   status: {
@@ -50,12 +52,18 @@ app.post('/submit-attendance', async (req, res) => {
 
     console.log("🕒 Server IST Time:", indiaTime.toString());
 
-    // ✅ Allow only between 5:00 PM to 6:30 PM
-    if ((hour === 19 && minute >= 0) || (hour === 20 && minute <= 30)){
+    // ✅ Allow only between 7:00 PM to 8:30 PM
+    if (
+  (hour === 21 && minute >= 0) ||      // 9:00 PM to 9:59 PM
+  (hour === 22) ||                     // 10:00 PM to 10:59 PM
+  (hour === 23 && minute <= 30)        // 11:00 PM to 11:30 PM
+) {
       const newAttendance = new Attendance({
         name,
         roll,
         date,
+        time: indiaTime.toLocaleTimeString(), // ✅ Store readable time
+        location: `${latitude}, ${longitude}`, // ✅ Store readable location
         latitude,
         longitude,
         status: "Pending"
@@ -64,11 +72,34 @@ app.post('/submit-attendance', async (req, res) => {
       await newAttendance.save();
       res.status(200).json({ message: "✅ Attendance submitted and pending staff approval." });
     } else {
-      res.status(403).json({ message: "❌ Attendance only allowed between 7:00 - 8:30 PM (IST)." });
+      res.status(403).json({ message: "❌ Attendance only allowed between 9:00 - 11:30 PM (IST)." });
     }
   } catch (err) {
     console.error("❌ Error saving attendance:", err);
     res.status(500).json({ message: "❌ Server error." });
+  }
+});
+
+// ✅ Staff Dashboard API to View Attendance
+app.get('/staff/attendance', async (req, res) => {
+  try {
+    const records = await Attendance.find();
+    res.json(records);
+  } catch (err) {
+    console.error("❌ Failed to fetch attendance:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ✅ Staff API to Approve/Reject
+app.put('/staff/attendance/:id', async (req, res) => {
+  try {
+    const { status } = req.body;
+    const updated = await Attendance.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    res.json(updated);
+  } catch (err) {
+    console.error("❌ Update error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 });
 

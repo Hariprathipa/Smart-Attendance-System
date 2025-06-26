@@ -7,7 +7,7 @@ document.getElementById("attendanceForm").addEventListener("submit", async funct
   const minutes = now.getMinutes();
 
   if (hour !== 9 || minutes > 30) {
-    alert("⏰ Attendance is only allowed from 7:00 AM to 8:30 pM.");
+    alert("⏰ Attendance is only allowed from 9:00 AM to 11:30 pM.");
     return;
   }
 
