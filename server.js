@@ -25,8 +25,8 @@ const attendanceSchema = new mongoose.Schema({
   name: String,
   roll: String,
   date: String,
-  time: String,         // ✅ Store time
-  location: String,     // ✅ Store location as string
+  time: String,
+  location: String,
   latitude: Number,
   longitude: Number,
   status: {
@@ -44,7 +44,6 @@ app.post('/submit-attendance', async (req, res) => {
   try {
     const { name, roll, date, latitude, longitude } = req.body;
 
-    // ✅ Convert to IST
     const now = new Date();
     const indiaTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
     const hour = indiaTime.getHours();
@@ -52,18 +51,18 @@ app.post('/submit-attendance', async (req, res) => {
 
     console.log("🕒 Server IST Time:", indiaTime.toString());
 
-    // ✅ Allow only between 7:00 PM to 8:30 PM
+    // ✅ Allow only between 9:00 PM to 11:30 PM
     if (
-  (hour === 21 && minute >= 0) ||      // 9:00 PM to 9:59 PM
-  (hour === 22) ||                     // 10:00 PM to 10:59 PM
-  (hour === 23 && minute <= 30)        // 11:00 PM to 11:30 PM
-) {
+      (hour === 21 && minute >= 0) || // 9:00–9:59 PM
+      (hour === 22) ||                // 10:00–10:59 PM
+      (hour === 23 && minute <= 30)   // 11:00–11:30 PM
+    ) {
       const newAttendance = new Attendance({
         name,
         roll,
         date,
-        time: indiaTime.toLocaleTimeString(), // ✅ Store readable time
-        location: `${latitude}, ${longitude}`, // ✅ Store readable location
+        time: indiaTime.toLocaleTimeString(),
+        location: ${latitude}, ${longitude},
         latitude,
         longitude,
         status: "Pending"
@@ -80,7 +79,7 @@ app.post('/submit-attendance', async (req, res) => {
   }
 });
 
-// ✅ Staff Dashboard API to View Attendance
+// ✅ View Attendance (Staff)
 app.get('/staff/attendance', async (req, res) => {
   try {
     const records = await Attendance.find();
@@ -91,7 +90,7 @@ app.get('/staff/attendance', async (req, res) => {
   }
 });
 
-// ✅ Staff API to Approve/Reject
+// ✅ Approve/Reject Attendance (Staff)
 app.put('/staff/attendance/:id', async (req, res) => {
   try {
     const { status } = req.body;
@@ -103,7 +102,11 @@ app.put('/staff/attendance/:id', async (req, res) => {
   }
 });
 
-// ✅ Start Server
+// ✅ Serve Staff Dashboard (optional if not in public/)
+app.get('/staffs.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'staffs.html'));
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);

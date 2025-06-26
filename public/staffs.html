@@ -44,8 +44,8 @@
           <td>${entry.name}</td>
           <td>${entry.roll}</td>
           <td>${entry.date}</td>
-          <td>${entry.time}</td>
-          <td>${entry.location}</td>
+          <td>${entry.time || ''}</td>
+          <td>${entry.location || ''}</td>
           <td><strong class="${entry.status === 'Approved' ? 'text-success' : entry.status === 'Rejected' ? 'text-danger' : 'text-warning'}">${entry.status}</strong></td>
           <td>
             <button class="btn btn-success btn-sm me-1" onclick="handleAction('${entry._id}', 'Approved')">Approve</button>
@@ -58,7 +58,7 @@
     }
 
     async function handleAction(id, status) {
-      await fetch(`/staff/attendance/{id}`, {
+      await fetch(`/staff/attendance/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status })
@@ -67,7 +67,6 @@
       fetchAttendance();
     }
 
-    // Initial load
     fetchAttendance();
   </script>
 
