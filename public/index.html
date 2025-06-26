@@ -23,67 +23,58 @@
       <div class="mb-3">
         <input type="time" class="form-control" name="time" required />
       </div>
+      <input type="hidden" id="latitude" name="latitude" />
+      <input type="hidden" id="longitude" name="longitude" />
       <button type="submit" class="btn btn-custom w-100">Submit Attendance</button>
     </form>
   </div>
+<script>
+  const form = document.getElementById("attendanceForm");
 
-  <script>
-    const form = document.getElementById("attendanceForm");
+  // 📍 Get location on page load
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      document.getElementById("latitude").value = position.coords.latitude;
+      document.getElementById("longitude").value = position.coords.longitude;
+    },
+    (error) => {
+      alert("📍 Location access required to mark attendance.");
+    }
+  );
 
-// ⏱ Time restriction: Only allow between 9:00–9:30
-function isTimeValid() {
-  const now = new Date();
-  const start = new Date();
-  start.setHours(9, 0, 0);
-  const end = new Date();
-  end.setHours(11, 30, 0);
-  return now >= start && now <= end;
-}
+  // ✅ Submit form
+  form.addEventListener("submit", async function (e) {
+    e.preventDefault();
 
-form.addEventListener("submit", async function (e) {
-  e.preventDefault();
-
-  if (!isTimeValid()) {
-    alert("Attendance only allowed between 9:00 – 11:30 pM.");
-    return;
-  }
-
-  if (!navigator.geolocation) {
-    alert("📍 Geolocation is not supported by your browser.");
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(async (position) => {
-    const latitude = position.coords.latitude;
-    const longitude = position.coords.longitude;
-
-    const data = {
-      name: form.name.value,
-      roll: form.roll.value,
-      date: form.date.value,
-      latitude,
-      longitude
+    const formData = {
+      name: document.querySelector("input[name='name']").value,
+      roll: document.querySelector("input[name='roll']").value,
+      date: document.querySelector("input[name='date']").value,
+      latitude: document.getElementById("latitude").value,
+      longitude: document.getElementById("longitude").value,
     };
 
-    const response = await fetch("/submit-attendance", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(data)
-    });
+    try {
+      const response = await fetch("/submit-attendance", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
-    if (response.ok) {
-      alert("✅ Attendance submitted!");
-      form.reset();
-    } else {
-      const errorMsg = await response.text();
-      alert("❌ " + errorMsg);
+      const result = await response.json();
+      if (response.ok) {
+        alert(result.message || "✅ Attendance submitted successfully.");
+        form.reset();
+      } else {
+        alert(result.message || "❌ Attendance not allowed at this time.");
+      }
+    } catch (err) {
+      alert("❌ Network error. Try again.");
+      console.error(err);
     }
-  }, () => {
-    alert("❌ Please allow location access.");
   });
-});
-  </script>
+</script>
 </body>
 </html>

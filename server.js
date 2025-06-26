@@ -62,7 +62,7 @@ app.post('/submit-attendance', async (req, res) => {
         roll,
         date,
         time: indiaTime.toLocaleTimeString(),
-        location: ${latitude}, ${longitude},
+        location: `${latitude}, ${longitude}`,
         latitude,
         longitude,
         status: "Pending"
